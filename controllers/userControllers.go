@@ -16,7 +16,7 @@ var (
 func UserRegister(c *gin.Context) {
 	db := database.GetDB()
 	contentType := helpers.GetContentType(c)
-	_, _ = db, contentType
+
 	User := models.User{}
 
 	if contentType == appJSON {

@@ -10,14 +10,14 @@ type Product struct {
 	Title       string `json:"title" form:"title" valid:"required~Title of your product is Required"`
 	Description string `json:"description" form:"description" valid:"required~Descriptio of your product is Required"`
 	UserID      uint
-	USer        *User
+	User        *User
 }
 
 func (p *Product) BeforeCreate(tx *gorm.DB) (err error) {
-	_, errCreate := govalidator.ValidateStruct(p)
+	_, errCode := govalidator.ValidateStruct(p)
 
-	if errCreate != nil {
-		err = errCreate
+	if errCode != nil {
+		err = errCode
 		return
 	}
 

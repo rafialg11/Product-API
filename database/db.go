@@ -20,15 +20,15 @@ var (
 )
 
 func StartDB() {
-	config := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, user, password, dbname, dbPort)
-	dsn := config
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	config := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		host, user, password, dbname, dbPort)
 
+	db, err = gorm.Open(postgres.Open(config), &gorm.Config{})
 	if err != nil {
-		log.Fatal("error connection to DB: ", err)
+		log.Fatal("error connecting to DB :", err)
 	}
 
-	fmt.Println("Success connecting to DB")
+	fmt.Println("Sukses terhubung ke DB")
 	db.Debug().AutoMigrate(models.User{}, models.Product{})
 }
 
