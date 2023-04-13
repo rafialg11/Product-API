@@ -19,9 +19,13 @@ func StartApp() *gin.Engine {
 	productRouter := r.Group("/products")
 	{
 		productRouter.Use(middlewares.Authentication())
-		productRouter.POST("/", controllers.CreateProduct)
-
-		productRouter.PUT("/:productId", middlewares.ProductAuthorization(), controllers.UpdateProduct)
+		//user and admin can access
+		productRouter.POST("/", middlewares.UserAuthorization(), controllers.CreateProduct)
+		productRouter.GET("/:productId", middlewares.UserAuthorization(), middlewares.AccessByIdAuthorization(), controllers.GetProductById)
+		//only admin
+		productRouter.GET("/", middlewares.AdminAuthorization(), controllers.GetAllProduct)
+		productRouter.DELETE("/:productId", middlewares.AdminAuthorization(), controllers.DeleteProduct)
+		productRouter.PUT("/:productId", middlewares.AdminAuthorization(), controllers.UpdateProduct)
 	}
 
 	return r

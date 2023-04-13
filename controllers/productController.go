@@ -47,12 +47,49 @@ func CreateProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, Product)
 }
 
+func GetProductById(c *gin.Context) {
+	db := database.GetDB()
+	contentType := helpers.GetContentType(c)
+	Product := models.Product{}
+	User := models.User{}
+
+	productId, _ := strconv.Atoi(c.Param("productId"))
+
+	if contentType == appJSON {
+		c.ShouldBindJSON(&Product)
+	} else {
+		c.ShouldBind(&Product)
+	}
+
+	Product.User = &User
+
+	if err := db.First(&Product, "id = ?", productId).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err":     "Bad Request",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	userID := Product.UserID
+
+	err := db.First(&User, "id = ?", userID).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err":     "Bad Request",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, Product)
+}
+
 func UpdateProduct(c *gin.Context) {
 	db := database.GetDB()
 	userData := c.MustGet("userData").(jwt.MapClaims)
 	contentType := helpers.GetContentType(c)
 	Product := models.Product{}
-	User := models.User{}
 
 	productId, _ := strconv.Atoi(c.Param("productId"))
 	userID := uint(userData["id"].(float64))
@@ -65,12 +102,6 @@ func UpdateProduct(c *gin.Context) {
 
 	Product.UserID = userID
 	Product.ID = uint(productId)
-	Product.User = &User
-
-	if err := db.First(&User, "id = ?", userID).Error; err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Gagal Mendapatkan Data"})
-		return
-	}
 
 	err := db.Model(&Product).Where("id = ?", productId).Updates(models.Product{Title: Product.Title, Description: Product.Description}).Error
 
@@ -82,5 +113,54 @@ func UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, Product)
+	c.JSON(http.StatusOK, Product)
+}
+
+func DeleteProduct(c *gin.Context) {
+	db := database.GetDB()
+	contentType := helpers.GetContentType(c)
+	Product := models.Product{}
+
+	productId, _ := strconv.Atoi(c.Param("productId"))
+	Product.ID = uint(productId)
+	if contentType == appJSON {
+		c.ShouldBindJSON(&Product)
+	} else {
+		c.ShouldBind(&Product)
+	}
+
+	err := db.Where("id = ?", productId).Delete(&Product).Error
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err":     "Bad Request",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, "Deleted")
+}
+
+func GetAllProduct(c *gin.Context) {
+	db := database.GetDB()
+	contentType := helpers.GetContentType(c)
+	var Product []models.Product
+
+	if contentType == appJSON {
+		c.ShouldBindJSON(&Product)
+	} else {
+		c.ShouldBind(&Product)
+	}
+
+	err := db.Find(&Product).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err":     "Bad Request",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, Product)
 }

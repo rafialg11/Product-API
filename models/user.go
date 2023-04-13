@@ -12,6 +12,7 @@ type User struct {
 	FullName string    `gorm:"not null" json:"full_name" form:"full_name" valid:"required~Your Full Name is Required"`
 	Email    string    `gorm:"not null;uniqueIndex" json:"email" form:"email" valid:"required~Your Email is Required,email~Invalid Email Format"`
 	Password string    `gorm:"not null" json:"-" form:"password" valid:"required~Your password is Required,minstringlength(6)~Password has to have a minimum of 6 characters"`
+	Role     string    `gorm:"not null" json:"role" form:"role" valid:"required~Your Role is Required"`
 	Products []Product `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"products"`
 }
 
