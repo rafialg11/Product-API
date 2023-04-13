@@ -2,6 +2,7 @@ package router
 
 import (
 	"product-api/controllers"
+	"product-api/middlewares"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +14,12 @@ func StartApp() *gin.Engine {
 	{
 		userRouter.POST("/register", controllers.UserRegister)
 		userRouter.POST("/login", controllers.UserLogin)
+	}
+
+	productRouter := r.Group("/products")
+	{
+		productRouter.Use(middlewares.Authentication())
+		productRouter.POST("/", controllers.CreateProduct)
 	}
 
 	return r
