@@ -5,11 +5,20 @@ import (
 	"product-api/database"
 	"product-api/helpers"
 	"product-api/models"
+	"product-api/service"
 	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
+
+type ProductController struct {
+	Service service.PService
+}
+
+func NewProductController(Service service.PService) *ProductController {
+	return &ProductController{Service}
+}
 
 func CreateProduct(c *gin.Context) {
 	db := database.GetDB()
@@ -47,33 +56,10 @@ func CreateProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, Product)
 }
 
-func GetProductById(c *gin.Context) {
-	db := database.GetDB()
-	contentType := helpers.GetContentType(c)
-	Product := models.Product{}
-	User := models.User{}
-
+func (pc *ProductController) GetProductById(c *gin.Context) {
 	productId, _ := strconv.Atoi(c.Param("productId"))
 
-	if contentType == appJSON {
-		c.ShouldBindJSON(&Product)
-	} else {
-		c.ShouldBind(&Product)
-	}
-
-	Product.User = &User
-
-	if err := db.First(&Product, "id = ?", productId).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"err":     "Bad Request",
-			"message": err.Error(),
-		})
-		return
-	}
-
-	userID := Product.UserID
-
-	err := db.First(&User, "id = ?", userID).Error
+	product, err := pc.Service.GetOneProduct(uint(productId))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"err":     "Bad Request",
@@ -82,7 +68,7 @@ func GetProductById(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, Product)
+	c.JSON(http.StatusOK, product)
 }
 
 func UpdateProduct(c *gin.Context) {
@@ -103,7 +89,7 @@ func UpdateProduct(c *gin.Context) {
 	Product.UserID = userID
 	Product.ID = uint(productId)
 
-	err := db.Model(&Product).Where("id = ?", productId).Updates(models.Product{Title: Product.Title, Description: Product.Description}).Error
+	err := db.Model(&Product).Where("id = ?", productId).Updates(models.InputProduct{Title: Product.Title, Description: Product.Description}).Error
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -142,18 +128,8 @@ func DeleteProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, "Deleted")
 }
 
-func GetAllProduct(c *gin.Context) {
-	db := database.GetDB()
-	contentType := helpers.GetContentType(c)
-	var Product []models.Product
-
-	if contentType == appJSON {
-		c.ShouldBindJSON(&Product)
-	} else {
-		c.ShouldBind(&Product)
-	}
-
-	err := db.Find(&Product).Error
+func (pc *ProductController) GetAllProduct(c *gin.Context) {
+	product, err := pc.Service.GetAllProduct()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"err":     "Bad Request",
@@ -162,5 +138,5 @@ func GetAllProduct(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, Product)
+	c.JSON(http.StatusOK, product)
 }
