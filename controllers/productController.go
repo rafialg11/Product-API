@@ -89,7 +89,8 @@ func UpdateProduct(c *gin.Context) {
 	Product.UserID = userID
 	Product.ID = uint(productId)
 
-	err := db.Model(&Product).Where("id = ?", productId).Updates(models.InputProduct{Title: Product.Title, Description: Product.Description}).Error
+	Product.ID = uint(productId)
+	err := db.Model(&Product).Where("id=?", productId).Updates(models.InputProduct{Title: Product.InputProduct.Title, Description: Product.InputProduct.Description}).Error
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

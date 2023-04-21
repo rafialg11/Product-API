@@ -5,16 +5,16 @@ import (
 	"gorm.io/gorm"
 )
 
+type InputProduct struct {
+	Title       string `json:"title" form:"title" valid:"required~Title of your product is Required"`
+	Description string `json:"description" form:"description"`
+}
+
 type Product struct {
 	GormModel
 	InputProduct
 	UserID uint
 	User   *User
-}
-
-type InputProduct struct {
-	Title       string `json:"title" form:"title" valid:"required~Title of your product is Required"`
-	Description string `json:"description" form:"description" valid:"required~Descriptio of your product is Required"`
 }
 
 func (p *Product) BeforeCreate(tx *gorm.DB) (err error) {

@@ -42,6 +42,7 @@ func TestProductServiceGetOneProduct(t *testing.T) {
 	assert.NotNil(t, result)
 
 	assert.Equal(t, product.GormModel.ID, result.GormModel.ID, "Result has to be '2'")
+
 	assert.Equal(t, &product, result, "Result has to be product data with id '2'")
 }
 
@@ -56,12 +57,12 @@ func TestProductServiceGetAllProductNotAvailable(t *testing.T) {
 }
 
 func TestProductServiceGetAllProduct(t *testing.T) {
-	product := []models.Product{
+	inputan := []models.Product{
 		{
 			GormModel: models.GormModel{
 				ID: 1,
 			},
-			UserID: 2,
+			UserID: 1,
 			InputProduct: models.InputProduct{
 				Title:       "Kasur",
 				Description: "Kasur Busa kualitas terbaik",
@@ -72,17 +73,17 @@ func TestProductServiceGetAllProduct(t *testing.T) {
 			GormModel: models.GormModel{
 				ID: 2,
 			},
-			UserID: 2,
+			UserID: 1,
 			InputProduct: models.InputProduct{
 				Title:       "Buku",
 				Description: "Buku baru",
 			},
 		},
 	}
-	productRepository.Mock.On("FindAll").Return(product)
+	productRepository.Mock.On("FindAll").Return(inputan)
 	result, err := productService.GetAllProduct()
 	assert.Nil(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, len(product), len(*result), "Result lenght")
-	assert.Equal(t, product, *result, "Result value")
+	assert.Equal(t, len(inputan), len(*result), "Result lenght")
+	assert.Equal(t, inputan, *result, "Result value")
 }
